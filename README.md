@@ -8,7 +8,6 @@ This repository hosts a **website-style analysis report** that presents the anal
 
 This README is written specifically for turning the analysis in the referenced GitHub projects into a presentable website/report:
 
-* `https://github.com/mimansha98/AQI-Prediction-before-and-after-Lockdown-of-COVID-19-in-India` (original analysis/code)
 * `https://github.com/Shirish12/AQI-Prediction-before-and-after-Lockdown-of-Covid-19-in-India` (alternate fork/branch)
 
 > **Goal:** Provide clear instructions to run the site locally, explain the site structure, highlight key analysis sections, and document deployment steps.
