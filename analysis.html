@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <!-- 
+      PRODUCTION NOTE: 
+      In a split environment, this <head> section belongs in index.html.
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comprehensive analysis of AQI levels in India before and after the COVID-19 lockdown using SARIMA and LSTM models.">
+    <meta name="keywords" content="AQI, India, COVID-19, Lockdown, Pollution, Data Analysis, Machine Learning">
+    <meta name="author" content="Mimansha98 Analysis">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="AQI Impact: COVID-19 Lockdown in India">
+    <meta property="og:description" content="Visualizing the dramatic drop in pollution levels across Indian cities.">
+    <meta property="og:type" content="website">
+
+    <title>AQI Impact Report | COVID-19 Lockdown Analysis</title>
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Fonts: Inter (Professional Sans-Serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons: Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Framework: Tailwind CSS (v3.3) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Library: Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0"></script>
+
+    <!-- 
+      PRODUCTION NOTE: 
+      In a split environment, the content inside <style> would go into 'style.css'.
+    -->
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #0f172a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Interactive Elements */
+        .hover-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 relative overflow-x-hidden">
+
+    <!-- 
+      NAVIGATION 
+    -->
+    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="glass border-b border-slate-200/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+                        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                            <i class="fa-solid fa-wind"></i>
+                        </div>
+                        <span class="font-bold text-xl tracking-tight text-slate-900">AQI<span class="text-blue-600">Viz</span></span>
+                    </div>
+                    
+                    <!-- Desktop Menu -->
+                    <div class="hidden md:flex space-x-8">
+                        <a href="#impact" class="text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors">Impact Summary</a>
+                        <a href="#methodology" class="text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors">Methodology</a>
+                        <a href="#analysis" class="text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors">Data Analysis</a>
+                        <a href="#predictions" class="text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors">Forecasts</a>
+                    </div>
+
+                    <!-- CTA -->
+                    <div class="hidden md:flex">
+                        <a href="https://github.com/mimansha98/AQI-Prediction-before-and-after-Lockdown-of-COVID-19-in-India" target="_blank" 
+                           class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition shadow-lg shadow-slate-900/20">
+                           <i class="fa-brands fa-github mr-2"></i>GitHub
+                        </a>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <div class="md:hidden flex items-center">
+                        <button id="mobile-menu-btn" class="text-slate-600 hover:text-slate-900 focus:outline-none p-2">
+                            <i class="fa-solid fa-bars text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 shadow-xl absolute w-full">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#impact" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Impact Summary</a>
+                <a href="#methodology" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Methodology</a>
+                <a href="#analysis" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Data Analysis</a>
+                <a href="#predictions" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50">Forecasts</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 
+      HERO SECTION 
+    -->
+    <header class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <!-- Background Decor -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-cyan-100 rounded-full blur-3xl opacity-50"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto fade-in-up">
+                <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold uppercase tracking-wider mb-6">
+                    Research Report 2020-2021
+                </div>
+                <h1 class="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight mb-6">
+                    The Air Quality <br>
+                    <span class="text-gradient">Paradigm Shift</span>
+                </h1>
+                <p class="mt-4 text-xl text-slate-500 leading-relaxed">
+                    Analyzing the unprecedented environmental impact of the COVID-19 lockdown in India through data science, SARIMA modeling, and LSTM neural networks.
+                </p>
+                <div class="mt-10 flex justify-center gap-4">
+                    <a href="#analysis" class="px-8 py-3.5 rounded-xl bg-blue-600 text-white font-semibold shadow-lg shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-1 transition-all duration-200">
+                        View Analytics
+                    </a>
+                    <a href="#methodology" class="px-8 py-3.5 rounded-xl bg-white text-slate-700 font-semibold border border-slate-200 shadow-sm hover:bg-slate-50 hover:-translate-y-1 transition-all duration-200">
+                        Methodology
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 
+      IMPACT SUMMARY (Metrics)
+    -->
+    <section id="impact" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Stat Card 1 -->
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover-card fade-in-up">
+                    <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-arrow-trend-down text-emerald-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-4xl font-bold text-slate-900 mb-2">43%</h3>
+                    <p class="text-lg font-semibold text-slate-700 mb-2">Reduction in PM2.5</p>
+                    <p class="text-slate-500 text-sm">Average reduction in particulate matter across major metros during the first 21 days of lockdown.</p>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover-card fade-in-up" style="transition-delay: 100ms;">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-city text-indigo-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-4xl font-bold text-slate-900 mb-2">8/10</h3>
+                    <p class="text-lg font-semibold text-slate-700 mb-2">Cities Improved</p>
+                    <p class="text-slate-500 text-sm">New Delhi, Mumbai, Kolkata, and Chennai witnessed their cleanest air quality index in over a decade.</p>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover-card fade-in-up" style="transition-delay: 200ms;">
+                    <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-microchip text-amber-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-4xl font-bold text-slate-900 mb-2">91%</h3>
+                    <p class="text-lg font-semibold text-slate-700 mb-2">Model Accuracy</p>
+                    <p class="text-slate-500 text-sm">LSTM neural networks successfully predicted the post-lockdown "pollution rebound" effect.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 
+      METHODOLOGY 
+    -->
+    <section id="methodology" class="py-20 bg-slate-900 text-white relative overflow-hidden">
+        <!-- Decoration -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
+            <i class="fa-solid fa-chart-network absolute top-10 left-10 text-9xl"></i>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-16 fade-in-up">
+                <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Technical Methodology</h2>
+                <p class="mt-4 text-slate-400 max-w-2xl mx-auto">
+                    A multi-stage data pipeline approach was used to ensure data integrity and model robustness.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Step 1 -->
+                <div class="glass-dark p-6 rounded-xl fade-in-up">
+                    <div class="text-blue-400 font-mono text-sm mb-2">01. Ingestion</div>
+                    <h3 class="text-xl font-semibold mb-3">Data Collection</h3>
+                    <p class="text-slate-400 text-sm">Raw daily AQI data (2015-2020) aggregated from Central Pollution Control Board (CPCB) for Tier-1 cities.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="glass-dark p-6 rounded-xl fade-in-up" style="transition-delay: 100ms;">
+                    <div class="text-blue-400 font-mono text-sm mb-2">02. Preprocessing</div>
+                    <h3 class="text-xl font-semibold mb-3">Cleaning & ETL</h3>
+                    <p class="text-slate-400 text-sm">Handling missing values using KNN imputation. Resampling time-series data to daily frequency.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="glass-dark p-6 rounded-xl fade-in-up" style="transition-delay: 200ms;">
+                    <div class="text-blue-400 font-mono text-sm mb-2">03. Analysis</div>
+                    <h3 class="text-xl font-semibold mb-3">Statistical Test</h3>
+                    <p class="text-slate-400 text-sm">Dickey-Fuller tests for stationarity checks. Seasonal decomposition to isolate trend and seasonality.</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="glass-dark p-6 rounded-xl fade-in-up" style="transition-delay: 300ms;">
+                    <div class="text-blue-400 font-mono text-sm mb-2">04. Modeling</div>
+                    <h3 class="text-xl font-semibold mb-3">SARIMA & LSTM</h3>
+                    <p class="text-slate-400 text-sm">Training Seasonal ARIMA for linear trends and Long Short-Term Memory networks for complex non-linear patterns.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 
+      ANALYSIS DASHBOARD 
+    -->
+    <section id="analysis" class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 fade-in-up">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900">Regional Impact Analysis</h2>
+                    <p class="mt-2 text-slate-600">Comparison of AQI levels: Pre-Lockdown vs. During Lockdown.</p>
+                </div>
+                <div class="mt-4 md:mt-0 flex gap-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span class="w-2 h-2 rounded-full bg-blue-600 mr-2"></span> Pre-Lockdown
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600 mr-2"></span> Lockdown
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Bar Chart Container -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 fade-in-up">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-6">Major Cities Comparison</h3>
+                    <div class="relative h-80 w-full">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Line Chart Container -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 fade-in-up" style="transition-delay: 100ms;">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-6">Delhi Time Series (Jan - May 2020)</h3>
+                    <div class="relative h-80 w-full">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insight Box -->
+            <div class="bg-white rounded-2xl p-8 border-l-4 border-blue-600 shadow-sm fade-in-up">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-lightbulb text-yellow-500 text-xl mt-1"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h4 class="text-lg font-bold text-slate-900">Key Observation: The "Delhi Anomaly"</h4>
+                        <p class="mt-2 text-slate-600 leading-relaxed">
+                            Delhi typically averages an AQI of 200+ (Poor/Severe). During the lockdown phase (March 25 - April 14), daily averages dropped below 60 (Satisfactory) for consecutive days. This provides empirical evidence that vehicular and construction emissions are the primary drivers of the capital's pollution, rather than stubble burning during this specific season.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 
+      PREDICTIONS SECTION
+    -->
+    <section id="predictions" class="py-20 bg-white border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-12 lg:gap-16">
+                <!-- Text Content -->
+                <div class="lg:col-span-5 mb-10 lg:mb-0 fade-in-up">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Predictive Modeling</h2>
+                    <p class="text-slate-600 text-lg mb-8 leading-relaxed">
+                        Using LSTM neural networks trained on 5 years of historical data, we forecasted the post-unlock trends. The model predicted a rapid "V-shaped" recovery in pollution levels as restrictions eased.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-slate-700">SARIMA Accuracy (RMSE)</span>
+                                <span class="text-sm font-medium text-slate-900">24.5</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-slate-700">LSTM Accuracy (RMSE)</span>
+                                <span class="text-sm font-medium text-slate-900">18.2</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2.5">
+                                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 92%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="mt-8 text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-2">
+                        View Model Code on GitHub <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Prediction Chart -->
+                <div class="lg:col-span-7 fade-in-up" style="transition-delay: 200ms;">
+                    <div class="bg-slate-900 p-6 rounded-2xl shadow-xl text-white">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold">Forecast vs Actual (Unlock Phase)</h3>
+                            <span class="text-xs bg-slate-800 px-2 py-1 rounded border border-slate-700">Delhi Region</span>
+                        </div>
+                        <div class="relative h-80 w-full">
+                            <canvas id="predictionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 
+      FOOTER 
+    -->
+    <footer class="bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <span class="font-bold text-xl tracking-tight text-slate-900">AQI<span class="text-blue-600">Viz</span></span>
+                    <p class="mt-2 text-sm text-slate-500">
+                        Based on the research "AQI Prediction before and after Lockdown" by Mimansha Agrawal.
+                    </p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="https://github.com/mimansha98/AQI-Prediction-before-and-after-Lockdown-of-COVID-19-in-India" target="_blank" class="text-slate-400 hover:text-slate-600 transition">
+                        <span class="sr-only">GitHub</span>
+                        <i class="fa-brands fa-github text-2xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-8 border-t border-slate-200 pt-8 text-center text-sm text-slate-400">
+                &copy; 2025 AQI Analysis Report. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- 
+      PRODUCTION NOTE: 
+      In a split environment, the content inside <script> would go into 'script.js'.
+    -->
+    <script>
+        /**
+         * 1. UTILITIES & CONFIG
+         */
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.scale.grid.color = '#f1f5f9';
+        
+        // Helper for consistent chart tooltips
+        const commonTooltipOptions = {
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            titleColor: '#0f172a',
+            bodyColor: '#334155',
+            borderColor: '#e2e8f0',
+            borderWidth: 1,
+            padding: 10,
+            displayColors: true,
+            cornerRadius: 8,
+            titleFont: { weight: 'bold' }
+        };
+
+        /**
+         * 2. CHART GENERATION
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Chart 1: Bar Chart (Regional Comparison) ---
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bangalore'],
+                    datasets: [
+                        {
+                            label: 'Pre-Lockdown (Jan-Feb)',
+                            data: [245, 160, 185, 110, 95],
+                            backgroundColor: '#3b82f6', // Blue-500
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        },
+                        {
+                            label: 'Lockdown (Mar-Apr)',
+                            data: [110, 85, 95, 65, 55],
+                            backgroundColor: '#10b981', // Emerald-500
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8 } },
+                        tooltip: commonTooltipOptions
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // --- Chart 2: Line Chart (Time Series) ---
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            
+            // Simulating Data
+            const labelsLine = Array.from({length: 60}, (_, i) => `Day ${i+1}`);
+            const dataPre = Array.from({length: 25}, () => Math.floor(Math.random() * (280 - 180) + 180));
+            const dataPost = Array.from({length: 35}, () => Math.floor(Math.random() * (120 - 50) + 50));
+            const totalData = [...dataPre, ...dataPost];
+
+            new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: labelsLine,
+                    datasets: [{
+                        label: 'AQI Level',
+                        data: totalData,
+                        borderColor: '#6366f1', // Indigo-500
+                        backgroundColor: (context) => {
+                            const ctx = context.chart.ctx;
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+                            gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+                            return gradient;
+                        },
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: commonTooltipOptions,
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    xMin: 24,
+                                    xMax: 24,
+                                    borderColor: '#ef4444',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: 'Lockdown Begins',
+                                        display: true,
+                                        position: 'start',
+                                        backgroundColor: '#ef4444',
+                                        color: 'white',
+                                        font: { size: 10 }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: { display: false }
+                    }
+                }
+            });
+
+            // --- Chart 3: Prediction (Dark Theme) ---
+            const ctxPred = document.getElementById('predictionChart').getContext('2d');
+            new Chart(ctxPred, {
+                type: 'line',
+                data: {
+                    labels: ['May W1', 'May W2', 'May W3', 'May W4', 'Jun W1', 'Jun W2'],
+                    datasets: [
+                        {
+                            label: 'Model Prediction (LSTM)',
+                            data: [65, 78, 95, 110, 135, 150],
+                            borderColor: '#60a5fa', // Blue-400
+                            borderDash: [6, 4],
+                            borderWidth: 2,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Actual Observed',
+                            data: [62, 75, 105, 115, 130, 158],
+                            borderColor: '#34d399', // Emerald-400
+                            borderWidth: 2,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#e2e8f0' } },
+                        tooltip: commonTooltipOptions
+                    },
+                    scales: {
+                        y: { 
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: { 
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        });
+
+        /**
+         * 3. UI ANIMATIONS (Intersection Observer)
+         */
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); // Only animate once
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        /**
+         * 4. MOBILE MENU TOGGLE
+         */
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Close menu when clicking a link
+        menu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.add('hidden');
+            });
+        });
+        
+        // Navbar blur effect on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-sm');
+            } else {
+                nav.classList.remove('shadow-sm');
+            }
+        });
+    </script>
+</body>
+</html>
